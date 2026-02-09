@@ -30,3 +30,4 @@ pub fn generate_snail_goal(n: usize) -> Vec<u16> {
     let max = (n * n) as u16;
     grid.into_iter().flatten().map(|x| if x == max { 0 } else { x }).collect()
 }
+// hello
