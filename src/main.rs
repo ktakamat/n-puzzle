@@ -1,6 +1,6 @@
 mod puzzle;
 
-use puzzle::{parse_file, generate_snail_goal, is_solvable};
+use puzzle::{parse_file, generate_snail_goal, is_solvable, select_heuristic, search};
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -25,8 +25,27 @@ fn main() {
                 return;
             }
 
-            let neighbors = initial_state.get_neighbors();
-            println!("Possible moves: {}", neighbors.len());
+            // Select heuristic
+            let heuristic = select_heuristic();
+
+            // Run IDA* search
+            println!("\nSearching for solution...\n");
+            match search(initial_state, &goal_board, heuristic.as_ref()) {
+                Ok(metrics) => {
+                    println!("\x1b[32m=== SOLUTION FOUND ===\x1b[0m");
+                    println!("Total states opened: {}", metrics.total_states_opened);
+                    println!("Max states in memory: {}", metrics.max_states_in_memory);
+                    println!("Solution length: {} moves\n", metrics.solution_path.len() - 1);
+                    
+                    println!("Solution path:");
+                    for (i, state) in metrics.solution_path.iter().enumerate() {
+                        println!("Step {}: {:?}", i, state.board);
+                    }
+                }
+                Err(e) => {
+                    println!("\x1b[31mError: {}\x1b[0m", e);
+                }
+            }
         },
         Err(e) => eprintln!("Error: {}", e),
     }
