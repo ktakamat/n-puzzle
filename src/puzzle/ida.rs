@@ -1,5 +1,5 @@
-use crate::puzzle::state::State;
 use crate::puzzle::heuristic::Heuristic;
+use crate::puzzle::state::State;
 use std::collections::HashSet;
 
 pub struct SearchMetrics {
@@ -8,6 +8,7 @@ pub struct SearchMetrics {
     pub solution_path: Vec<State>,
 }
 
+// start of IDA*; Manages the search and stats; g starts at 0
 pub fn search(
     initial_state: State,
     goal_board: &[u16],
@@ -15,16 +16,13 @@ pub fn search(
 ) -> Result<SearchMetrics, String> {
     let goal_h = heuristic.estimate(&initial_state, goal_board);
     let mut threshold = goal_h;
-    let mut total_states_opened = 0;
+    let mut total_states_opened;
     let mut max_states_in_memory = 0;
 
     loop {
         let mut visited_this_iteration = HashSet::new();
-        let mut iteration_stats = IterationStats {
-            states_opened: 0,
-            max_depth_reached: 0,
-        };
-        
+        let mut iteration_stats = IterationStats { states_opened: 0 };
+
         let (found, path, next_threshold) = search_recursive(
             &initial_state,
             goal_board,
@@ -56,7 +54,6 @@ pub fn search(
 
 struct IterationStats {
     states_opened: usize,
-    max_depth_reached: usize,
 }
 
 fn search_recursive(
@@ -72,19 +69,15 @@ fn search_recursive(
     let f = g + h;
 
     stats.states_opened += 1;
-    stats.max_depth_reached = stats.max_depth_reached.max(g as usize);
 
-    // If f exceeds threshold, return pruned
     if f > threshold {
         return (false, Vec::new(), f);
     }
 
-    // Goal check
     if state.board == goal_board {
         return (true, vec![state.clone()], f);
     }
 
-    // Cycle detection: skip if already in current path
     if !path_visited.insert(state.board.clone()) {
         return (false, Vec::new(), u32::MAX);
     }
@@ -112,7 +105,6 @@ fn search_recursive(
         min_exceeded_f = min_exceeded_f.min(child_min_f);
     }
 
-    // Remove from path so other paths can explore it
     path_visited.remove(&state.board);
 
     (false, Vec::new(), min_exceeded_f)

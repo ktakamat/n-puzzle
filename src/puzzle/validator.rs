@@ -25,7 +25,7 @@ pub fn is_solvable(size: usize, initial_board: &[u16], goal_board: &[u16]) -> bo
     } else {
         let row_initial = get_blank_row(initial_board, size);
         let row_goal = get_blank_row(goal_board, size);
-        
+
         (inv_initial % 2 == inv_goal % 2) == (row_initial % 2 == row_goal % 2)
     }
 }

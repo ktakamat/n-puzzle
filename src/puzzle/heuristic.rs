@@ -2,7 +2,6 @@ use crate::puzzle::state::State;
 
 pub trait Heuristic {
     fn estimate(&self, state: &State, goal: &[u16]) -> u32;
-    fn name(&self) -> &str;
 }
 
 pub struct ManhattanDistance;
@@ -26,15 +25,12 @@ impl Heuristic for ManhattanDistance {
                 let goal_row = (goal_pos as i32) / size;
                 let goal_col = (goal_pos as i32) % size;
 
-                distance += ((current_row - goal_row).abs() + (current_col - goal_col).abs()) as u32;
+                distance +=
+                    ((current_row - goal_row).abs() + (current_col - goal_col).abs()) as u32;
             }
         }
 
         distance
-    }
-
-    fn name(&self) -> &str {
-        "Manhattan Distance"
     }
 }
 
@@ -44,7 +40,6 @@ impl Heuristic for LinearConflictManhattan {
         let mut manhattan = 0u32;
         let mut conflicts = 0u32;
 
-        // Calculate Manhattan distance
         for (i, &tile) in state.board.iter().enumerate() {
             if tile == 0 {
                 continue;
@@ -57,11 +52,11 @@ impl Heuristic for LinearConflictManhattan {
                 let goal_row = (goal_pos as i32) / size;
                 let goal_col = (goal_pos as i32) % size;
 
-                manhattan += ((current_row - goal_row).abs() + (current_col - goal_col).abs()) as u32;
+                manhattan +=
+                    ((current_row - goal_row).abs() + (current_col - goal_col).abs()) as u32;
             }
         }
 
-        // Count linear conflicts in rows
         for row in 0..size {
             for i in 0..size {
                 let pos1 = (row * size + i) as usize;
@@ -101,7 +96,6 @@ impl Heuristic for LinearConflictManhattan {
             }
         }
 
-        // Count linear conflicts in columns
         for col in 0..size {
             for i in 0..size {
                 let pos1 = (i * size + col) as usize;
@@ -143,10 +137,6 @@ impl Heuristic for LinearConflictManhattan {
 
         manhattan + conflicts
     }
-
-    fn name(&self) -> &str {
-        "Linear Conflict Manhattan"
-    }
 }
 
 impl Heuristic for MisplacedTiles {
@@ -159,24 +149,6 @@ impl Heuristic for MisplacedTiles {
         }
         count
     }
-
-    fn name(&self) -> &str {
-        "Misplaced Tiles"
-    }
-}
-
-pub enum HeuristicChoice {
-    Manhattan,
-    LinearConflict,
-    MisplacedTiles,
-}
-
-pub fn get_heuristic(choice: HeuristicChoice) -> Box<dyn Heuristic> {
-    match choice {
-        HeuristicChoice::Manhattan => Box::new(ManhattanDistance),
-        HeuristicChoice::LinearConflict => Box::new(LinearConflictManhattan),
-        HeuristicChoice::MisplacedTiles => Box::new(MisplacedTiles),
-    }
 }
 
 pub fn select_heuristic() -> Box<dyn Heuristic> {
@@ -185,20 +157,22 @@ pub fn select_heuristic() -> Box<dyn Heuristic> {
     println!("2. Linear Conflict Manhattan");
     println!("3. Misplaced Tiles");
     print!("Choice (1-3): ");
-    
+
     use std::io::{self, Write};
     io::stdout().flush().unwrap();
-    
+
     let mut input = String::new();
-    io::stdin().read_line(&mut input).expect("Failed to read line");
-    
+    io::stdin()
+        .read_line(&mut input)
+        .expect("Failed to read line");
+
     match input.trim() {
-        "1" => get_heuristic(HeuristicChoice::Manhattan),
-        "2" => get_heuristic(HeuristicChoice::LinearConflict),
-        "3" => get_heuristic(HeuristicChoice::MisplacedTiles),
+        "1" => Box::new(ManhattanDistance),
+        "2" => Box::new(LinearConflictManhattan),
+        "3" => Box::new(MisplacedTiles),
         _ => {
             println!("Invalid choice, defaulting to Manhattan Distance");
-            get_heuristic(HeuristicChoice::Manhattan)
+            Box::new(ManhattanDistance)
         }
     }
 }

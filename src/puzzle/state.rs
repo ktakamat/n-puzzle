@@ -1,18 +1,24 @@
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct State {
     pub board: Vec<u16>,
     pub size: usize,
     pub blank_pos: usize,
-    pub g: u32,
-    pub h: u32,
 }
 
 impl State {
     pub fn new(board: Vec<u16>, size: usize) -> Self {
-        let blank_pos = board.iter().position(|&x| x == 0).expect("No blank (0) tile found");
-        Self { board, size, blank_pos, g: 0, h: 0 }
+        let blank_pos = board
+            .iter()
+            .position(|&x| x == 0)
+            .expect("No blank (0) tile found");
+        Self {
+            board,
+            size,
+            blank_pos,
+        }
     }
 
+    // Generate new boards for neighbors
     pub fn get_neighbors(&self) -> Vec<State> {
         let mut neighbors = Vec::new();
         let size = self.size as isize;
@@ -32,8 +38,6 @@ impl State {
                     board: new_board,
                     size: self.size,
                     blank_pos: new_blank_pos,
-                    g: self.g + 1,
-                    h: 0,
                 });
             }
         }

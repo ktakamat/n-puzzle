@@ -1,5 +1,5 @@
-use std::fs;
 use crate::puzzle::state::State;
+use std::fs;
 
 pub fn parse_file(path: &str) -> Result<State, String> {
     let content = fs::read_to_string(path).map_err(|e| e.to_string())?;
@@ -8,7 +8,7 @@ pub fn parse_file(path: &str) -> Result<State, String> {
 
     for line in content.lines() {
         let clean_line = line.split('#').next().unwrap_or("").trim();
-        if clean_line.is_empty() { 
+        if clean_line.is_empty() {
             continue;
         }
         if size.is_none() {
@@ -21,9 +21,9 @@ pub fn parse_file(path: &str) -> Result<State, String> {
     }
 
     let n = size.ok_or("Size not found")?;
-    if numbers.len() != n * n { 
+    if numbers.len() != n * n {
         return Err("Board size mismatch".into());
     }
-    
+
     Ok(State::new(numbers, n))
 }
