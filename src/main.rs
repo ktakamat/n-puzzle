@@ -1,6 +1,9 @@
 mod puzzle;
 
-use puzzle::{generate_snail_goal, is_solvable, parse_file, search, select_heuristic};
+use puzzle::{
+    generate_snail_goal, is_solvable, parse_file, search, select_heuristic, select_search_mode,
+    SearchMode,
+};
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -26,9 +29,10 @@ fn main() {
             }
 
             let heuristic = select_heuristic();
+            let mode: SearchMode = select_search_mode();
 
             println!("\nSearching for solution...\n");
-            match search(initial_state, &goal_board, heuristic.as_ref()) {
+            match search(initial_state, &goal_board, heuristic.as_ref(), mode) {
                 Ok(metrics) => {
                     println!("\x1b[32m=== SOLUTION FOUND ===\x1b[0m");
                     println!("Total states opened: {}", metrics.total_states_opened);

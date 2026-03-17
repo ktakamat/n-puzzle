@@ -151,6 +151,39 @@ impl Heuristic for MisplacedTiles {
     }
 }
 
+#[derive(Clone, Copy)]
+pub enum SearchMode {
+    Normal,
+    Greedy,
+    UniformCost,
+}
+
+pub fn select_search_mode() -> SearchMode {
+    println!("\n--- Select Search Mode ---");
+    println!("1. Normal (A*: f = g + h)");
+    println!("2. Greedy (f = h only)");
+    println!("3. Uniform-cost (f = g only)");
+    print!("Choice (1-3): ");
+
+    use std::io::{self, Write};
+    io::stdout().flush().unwrap();
+
+    let mut input = String::new();
+    io::stdin()
+        .read_line(&mut input)
+        .expect("Failed to read line");
+
+    match input.trim() {
+        "1" => SearchMode::Normal,
+        "2" => SearchMode::Greedy,
+        "3" => SearchMode::UniformCost,
+        _ => {
+            println!("Invalid choice, defaulting to Normal");
+            SearchMode::Normal
+        }
+    }
+}
+
 pub fn select_heuristic() -> Box<dyn Heuristic> {
     println!("\n--- Select Heuristic ---");
     println!("1. Manhattan Distance");
