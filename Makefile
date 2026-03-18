@@ -20,6 +20,6 @@ test:
 	@$(CARGO) test
 
 run:
-	@$(CARGO) run --
+	@$(CARGO) run $(ARGS)
 
 .PHONY: all clean fclean re test run
