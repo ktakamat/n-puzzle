@@ -1,4 +1,4 @@
-use crate::puzzle::heuristic::Heuristic;
+use crate::puzzle::heuristic::{Heuristic, SearchMode};
 use crate::puzzle::state::State;
 use std::collections::HashSet;
 
@@ -13,9 +13,13 @@ pub fn search(
     initial_state: State,
     goal_board: &[u16],
     heuristic: &dyn Heuristic,
+    mode: SearchMode,
 ) -> Result<SearchMetrics, String> {
-    let goal_h = heuristic.estimate(&initial_state, goal_board);
-    let mut threshold = goal_h;
+    let initial_h = heuristic.estimate(&initial_state, goal_board);
+    let mut threshold = match mode {
+        SearchMode::UniformCost => 0,
+        _ => initial_h,
+    };
     let mut total_states_opened;
     let mut max_states_in_memory = 0;
 
@@ -27,6 +31,7 @@ pub fn search(
             &initial_state,
             goal_board,
             heuristic,
+            mode,
             0,
             threshold,
             &mut visited_this_iteration,
@@ -60,13 +65,18 @@ fn search_recursive(
     state: &State,
     goal_board: &[u16],
     heuristic: &dyn Heuristic,
+    mode: SearchMode,
     g: u32,
     threshold: u32,
     path_visited: &mut HashSet<Vec<u16>>,
     stats: &mut IterationStats,
 ) -> (bool, Vec<State>, u32) {
     let h = heuristic.estimate(state, goal_board);
-    let f = g + h;
+    let f = match mode {
+        SearchMode::Normal => g + h,
+        SearchMode::Greedy => h,
+        SearchMode::UniformCost => g,
+    };
 
     stats.states_opened += 1;
 
@@ -90,6 +100,7 @@ fn search_recursive(
             &neighbor,
             goal_board,
             heuristic,
+            mode,
             g + 1,
             threshold,
             path_visited,
